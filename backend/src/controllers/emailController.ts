@@ -120,22 +120,24 @@ export const sendMails = async (req: any, res: Response) => {
 
     const attachments = rawAttachments
       .map((file: any) => {
-        if (!file || !file.path || !file.name || !file.type) {
-          console.warn(
-            'Skipping attachment due to missing required metadata:',
-            file
-          );
-          return null;
-        }
+        if (!file || !file.originalFilename || !file.path) return null;
+
         return {
           filename: file.name,
           path: file.path,
           contentType: file.type,
         };
       })
-      .filter(Boolean);
+      .filter(
+        (
+          attachment
+        ): attachment is {
+          filename: string;
+          path: string;
+          contentType: string;
+        } => attachment !== null
+      );
 
-    console.log({ firstAttachmentDetailsForSending: attachments[0] });
     const results = await Promise.all(
       recipients.map(async (recipient) => {
         const personalVariables = mapVariables(

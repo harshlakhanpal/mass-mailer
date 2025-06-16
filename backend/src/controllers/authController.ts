@@ -29,14 +29,10 @@ export const googleTokenExchange = async (req: Request, res: Response) => {
       }
     );
 
-    // ⬇️ You'll get access_token, refresh_token, expires_in etc.
     const { access_token, refresh_token, expires_in, id_token } = tokenRes.data;
 
-    // Save refresh_token in DB against the user (do NOT send it to frontend)
-    // Validate user info using id_token or fetch from Google
     res.status(200).json({ access_token, expires_in });
   } catch (err) {
-    console.error('Token exchange error:', err.response?.data || err.message);
     res.status(500).json({ error: 'Failed to exchange code for token' });
   }
 };

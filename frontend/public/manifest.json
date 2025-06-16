@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "MailEz",
+  "version": "1.0",
+  "description": "Upload CSV and send bulk emails",
+  "permissions": ["identity"],
+  "oauth2": {
+    "client_id": "638178568745-b27jhg3njctaqru8vqs9e8pv0tsi46mj.apps.googleusercontent.com",
+    "scopes": ["openid", "email", "profile"]
+  },
+  "action": {
+    "default_title": "MailEz"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "host_permissions": ["http://localhost:5001/", "https://www.googleapis.com/*"]
+}

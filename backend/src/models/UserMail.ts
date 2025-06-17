@@ -1,4 +1,4 @@
-import mongoose, { Document, ObjectId } from 'mongoose';
+import mongoose, { Document, ObjectId, Schema } from 'mongoose';
 
 export interface IUserMail extends Document {
   userId: ObjectId;
@@ -11,7 +11,7 @@ export interface IUserMail extends Document {
 
 const userMailSchema = new mongoose.Schema<IUserMail>(
   {
-    userId: { type: String, required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     from: { type: String, required: true },
     subject: { type: String, required: false },
     recipients: { type: [{}], required: true },

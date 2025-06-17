@@ -6,6 +6,7 @@ import { IUser, User } from '../models/User';
 import { parseTemplate, mapVariables } from '../utils';
 import { sendGmailEmail } from '../utils/sendGmailEmail';
 import fs from 'fs/promises';
+import mongoose from 'mongoose';
 
 export const getProfile = async (req: any, res: Response) => {
   const user = await User.findById(req.user.id).select('-password');
@@ -166,7 +167,7 @@ export const sendMails = async (req: any, res: Response) => {
     );
 
     const userMail = new UserMail({
-      userId: req.user.id,
+      userId: new mongoose.Types.ObjectId(req.user.id),
       from: user?.email,
       variables,
       body,
@@ -179,5 +180,18 @@ export const sendMails = async (req: any, res: Response) => {
   } catch (err) {
     console.error('sendMails error:', err);
     return res.status(500).json({ message: 'Failed to send emails' });
+  }
+};
+
+export const listMails = async (req: any, res: Response) => {
+  try {
+    const emails = await UserMail.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .select('subject recipients body variables createdAt')
+      .lean();
+    return res.status(200).json({ emails });
+  } catch (error) {
+    console.error('list mails error:', error);
+    return res.status(500).json({ message: 'Failed to retrieve emails' });
   }
 };

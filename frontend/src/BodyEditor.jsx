@@ -32,7 +32,7 @@ import {
   Redo as RedoIcon,
 } from '@mui/icons-material';
 
-const BodyEditor = ({ content, onContentChange, label }) => {
+const BodyEditor = ({ content, onContentChange, label, editable = true }) => {
   const [urlDialogOpen, setUrlDialogOpen] = React.useState(false);
   const [currentUrl, setCurrentUrl] = React.useState('');
 
@@ -48,6 +48,7 @@ const BodyEditor = ({ content, onContentChange, label }) => {
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML());
     },
+    editable,
     editorProps: {
       attributes: {
         class: 'tiptap-editor-content',
@@ -126,117 +127,119 @@ const BodyEditor = ({ content, onContentChange, label }) => {
         {label}
       </Box>
 
-      <Paper
-        elevation={0}
-        sx={{ mb: 1, p: 0.5, borderBottom: '1px solid #eee' }}
-      >
-        <ToggleButtonGroup
-          size="small"
-          exclusive
-          sx={{ '& .MuiToggleButton-root': customButtonSx }}
+      {editable && (
+        <Paper
+          elevation={0}
+          sx={{ mb: 1, p: 0.5, borderBottom: '1px solid #eee' }}
         >
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            disabled={!editor.can().chain().focus().toggleBold().run()}
-            selected={editor.isActive('bold')}
-            value="bold"
-            aria-label="bold"
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            sx={{ '& .MuiToggleButton-root': customButtonSx }}
           >
-            <FormatBoldIcon />
-          </ToggleButton>
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            disabled={!editor.can().chain().focus().toggleItalic().run()}
-            selected={editor.isActive('italic')}
-            value="italic"
-            aria-label="italic"
-          >
-            <FormatItalicIcon />
-          </ToggleButton>
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            disabled={!editor.can().chain().focus().toggleStrike().run()}
-            selected={editor.isActive('strike')}
-            value="strike"
-            aria-label="strike"
-          >
-            <FormatStrikethroughIcon />
-          </ToggleButton>
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            disabled={!editor.can().chain().focus().toggleCode().run()}
-            selected={editor.isActive('code')}
-            value="code"
-            aria-label="code"
-          >
-            <CodeIcon />
-          </ToggleButton>
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            selected={editor.isActive('blockquote')}
-            value="blockquote"
-            aria-label="blockquote"
-          >
-            <FormatQuoteIcon />
-          </ToggleButton>
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            selected={editor.isActive('bulletList')}
-            value="bulletList"
-            aria-label="bulleted list"
-          >
-            <FormatListBulletedIcon />
-          </ToggleButton>
-          <ToggleButton
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            selected={editor.isActive('orderedList')}
-            value="orderedList"
-            aria-label="ordered list"
-          >
-            <FormatListNumberedIcon />
-          </ToggleButton>
-
-          <Tooltip title="Add Link">
             <ToggleButton
-              onClick={handleUrlDialogOpen}
-              selected={editor.isActive('link')}
-              value="link"
-              aria-label="add link"
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              disabled={!editor.can().chain().focus().toggleBold().run()}
+              selected={editor.isActive('bold')}
+              value="bold"
+              aria-label="bold"
             >
-              <LinkIcon />
+              <FormatBoldIcon />
             </ToggleButton>
-          </Tooltip>
-          <Tooltip title="Remove Link">
             <ToggleButton
-              onClick={() => editor.chain().focus().unsetLink().run()}
-              disabled={!editor.isActive('link')}
-              value="unlink"
-              aria-label="remove link"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              disabled={!editor.can().chain().focus().toggleItalic().run()}
+              selected={editor.isActive('italic')}
+              value="italic"
+              aria-label="italic"
             >
-              <LinkOffIcon />
+              <FormatItalicIcon />
             </ToggleButton>
-          </Tooltip>
-        </ToggleButtonGroup>
+            <ToggleButton
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              disabled={!editor.can().chain().focus().toggleStrike().run()}
+              selected={editor.isActive('strike')}
+              value="strike"
+              aria-label="strike"
+            >
+              <FormatStrikethroughIcon />
+            </ToggleButton>
+            <ToggleButton
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              disabled={!editor.can().chain().focus().toggleCode().run()}
+              selected={editor.isActive('code')}
+              value="code"
+              aria-label="code"
+            >
+              <CodeIcon />
+            </ToggleButton>
+            <ToggleButton
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              selected={editor.isActive('blockquote')}
+              value="blockquote"
+              aria-label="blockquote"
+            >
+              <FormatQuoteIcon />
+            </ToggleButton>
+            <ToggleButton
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              selected={editor.isActive('bulletList')}
+              value="bulletList"
+              aria-label="bulleted list"
+            >
+              <FormatListBulletedIcon />
+            </ToggleButton>
+            <ToggleButton
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              selected={editor.isActive('orderedList')}
+              value="orderedList"
+              aria-label="ordered list"
+            >
+              <FormatListNumberedIcon />
+            </ToggleButton>
 
-        <IconButton
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().chain().focus().undo().run()}
-          size="small"
-          sx={customButtonSx}
-          aria-label="undo"
-        >
-          <UndoIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().chain().focus().redo().run()}
-          size="small"
-          sx={customButtonSx}
-          aria-label="redo"
-        >
-          <RedoIcon />
-        </IconButton>
-      </Paper>
+            <Tooltip title="Add Link">
+              <ToggleButton
+                onClick={handleUrlDialogOpen}
+                selected={editor.isActive('link')}
+                value="link"
+                aria-label="add link"
+              >
+                <LinkIcon />
+              </ToggleButton>
+            </Tooltip>
+            <Tooltip title="Remove Link">
+              <ToggleButton
+                onClick={() => editor.chain().focus().unsetLink().run()}
+                disabled={!editor.isActive('link')}
+                value="unlink"
+                aria-label="remove link"
+              >
+                <LinkOffIcon />
+              </ToggleButton>
+            </Tooltip>
+          </ToggleButtonGroup>
+
+          <IconButton
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().chain().focus().undo().run()}
+            size="small"
+            sx={customButtonSx}
+            aria-label="undo"
+          >
+            <UndoIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().chain().focus().redo().run()}
+            size="small"
+            sx={customButtonSx}
+            aria-label="redo"
+          >
+            <RedoIcon />
+          </IconButton>
+        </Paper>
+      )}
 
       <EditorContent editor={editor} style={{ flexGrow: 1, outline: 'none' }} />
 

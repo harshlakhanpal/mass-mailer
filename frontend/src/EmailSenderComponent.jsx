@@ -31,7 +31,7 @@ import BodyEditor from './BodyEditor';
 import { AuthContext } from './AuthContext';
 
 const EmailSenderComponent = () => {
-  const { token, user, logout, showMessage } = useContext(AuthContext);
+  const { token, showMessage } = useContext(AuthContext);
   const [inputMode, setInputMode] = useState('csv');
   const [csvFile, setCsvFile] = useState(null);
   const [attachment, setAttachment] = useState(null);
@@ -94,12 +94,12 @@ const EmailSenderComponent = () => {
             variableValues: Array(globalVariables.length).fill(''),
           },
         ]);
-        setCsvFile(null); // Clear CSV file selection
+        setCsvFile(null);
       } else {
         setRecipients([
           { id: crypto.randomUUID(), email: '', variableValues: [''] },
         ]);
-        setGlobalVariables([{ id: crypto.randomUUID(), name: '' }]); // Clear global variables
+        setGlobalVariables([{ id: crypto.randomUUID(), name: '' }]);
       }
     }
   };
@@ -110,7 +110,7 @@ const EmailSenderComponent = () => {
       {
         id: crypto.randomUUID(),
         email: '',
-        variableValues: Array(globalVariables.length).fill(''), // Initialize with empty values
+        variableValues: Array(globalVariables.length).fill(''),
       },
     ]);
   };
@@ -148,7 +148,7 @@ const EmailSenderComponent = () => {
       showMessage({
         open: true,
         title: 'Error',
-        message: 'Authentication token missing. Please log in again.',
+        message: 'Please log in again.',
       });
       return;
     }
@@ -168,7 +168,7 @@ const EmailSenderComponent = () => {
         showMessage({
           open: true,
           title: 'Validation Error',
-          message: 'Please ensure all global variable names are filled.',
+          message: 'Please ensure all variable names are filled.',
         });
         return;
       }
@@ -179,7 +179,7 @@ const EmailSenderComponent = () => {
         showMessage({
           open: true,
           title: 'Validation Error',
-          message: 'Global variable names must be unique (case-insensitive).',
+          message: 'Variable names must be unique (case-insensitive).',
         });
         return;
       }
@@ -187,8 +187,8 @@ const EmailSenderComponent = () => {
         (rec) =>
           rec.email &&
           rec.email.includes('@') &&
-          rec.email.includes('.') && // Basic email validation
-          rec.variableValues.every((val) => val !== '') // All values for global variables must be filled
+          rec.email.includes('.') &&
+          rec.variableValues.every((val) => val !== '')
       );
       if (recipients.length === 0 || !allRecipientsValid) {
         showMessage({
@@ -204,7 +204,7 @@ const EmailSenderComponent = () => {
     showMessage({
       open: true,
       title: 'Sending Emails',
-      message: 'Simulating email sending. Please wait...',
+      message: 'Templates being processed and sending emails!',
     });
     setLoading(true);
 
@@ -220,7 +220,7 @@ const EmailSenderComponent = () => {
       } else {
         formData.append('isManual', true);
         const globalVariableNames = globalVariables.map((v) => v.name);
-        formData.append('variables', JSON.stringify(globalVariableNames)); // Add global variable names
+        formData.append('variables', JSON.stringify(globalVariableNames));
         formData.append(
           'recipients',
           JSON.stringify(
@@ -233,12 +233,12 @@ const EmailSenderComponent = () => {
       }
 
       const response = await axios.post(
-        'http://localhost:5001/api/user/sendMails', // Replace with your backend route
+        'http://localhost:5001/api/user/sendMails',
         formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`, // if you need auth on the backend
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -247,17 +247,17 @@ const EmailSenderComponent = () => {
       showMessage({
         open: true,
         title: 'Success',
-        message: 'Emails simulated successfully! (No actual emails were sent)',
+        message: 'Emails sent successfully!',
       });
 
       if (inputMode === 'csv') {
         setCsvFile(null);
         document.getElementById('csv-file-input').value = '';
       } else {
-        setGlobalVariables([{ id: crypto.randomUUID(), name: '' }]); // Reset global variables
+        setGlobalVariables([{ id: crypto.randomUUID(), name: '' }]);
         setRecipients([
           { id: crypto.randomUUID(), email: '', variableValues: [''] },
-        ]); // Reset manual input
+        ]);
       }
       setAttachment(null);
       setSubject('');
@@ -268,7 +268,7 @@ const EmailSenderComponent = () => {
       showMessage({
         open: true,
         title: 'Error',
-        message: 'Failed to send emails (simulated).',
+        message: 'Failed to send emails.',
       });
     } finally {
       setLoading(false);
@@ -276,361 +276,322 @@ const EmailSenderComponent = () => {
   };
 
   return (
-    <Container
-      maxWidth="md"
-      sx={{ padding: 0, mx: 'auto', fontFamily: 'sans-serif' }}
-    >
-      <Box sx={{ padding: 1, borderRadius: 2, boxShadow: 3 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 2,
-          }}
+    <>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+        <ToggleButtonGroup
+          value={inputMode}
+          exclusive
+          onChange={handleInputModeChange}
+          aria-label="email input mode"
         >
-          <Typography
-            variant="h5"
-            component="h1"
-            sx={{ fontWeight: 'semibold', color: 'text.primary' }}
-          >
-            MailEz
-          </Typography>
-          <Button variant="outlined" color="secondary" onClick={logout}>
-            Logout
-          </Button>
-        </Box>
+          <ToggleButton value="csv" aria-label="upload csv">
+            <FileUploadIcon sx={{ mr: 1 }} /> Upload CSV
+          </ToggleButton>
+          <ToggleButton value="manual" aria-label="manual entry">
+            <GroupAddIcon sx={{ mr: 1 }} /> Manual Entry
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
-        <Typography variant="subtitle1" sx={{ color: 'text.secondary', mb: 4 }}>
-          Welcome,{' '}
-          <Box
-            component="span"
-            sx={{ fontWeight: 'medium', color: 'primary.main' }}
-          >
-            {user?.name || user?.email || 'User'}
-          </Box>
-        </Typography>
-
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-          <ToggleButtonGroup
-            value={inputMode}
-            exclusive
-            onChange={handleInputModeChange}
-            aria-label="email input mode"
-          >
-            <ToggleButton value="csv" aria-label="upload csv">
-              <FileUploadIcon sx={{ mr: 1 }} /> Upload CSV
-            </ToggleButton>
-            <ToggleButton value="manual" aria-label="manual entry">
-              <GroupAddIcon sx={{ mr: 1 }} /> Manual Entry
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
-
-        <form onSubmit={handleSubmit} style={{}}>
-          {inputMode === 'csv' ? (
-            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
-              <Button
-                component="label"
-                variant="contained"
-                startIcon={<FileUploadIcon />}
-              >
-                Upload CSV File
-                <input
-                  id="csv-file-input"
-                  type="file"
-                  hidden
-                  accept=".csv"
-                  onChange={(e) => setCsvFile(e.target.files[0])}
-                  required
-                />
-              </Button>
-              <Typography
-                variant="body2"
-                sx={{ color: 'text.secondary', ml: 2 }}
-              >
-                {csvFile ? csvFile.name : 'No CSV file selected'}
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: 'success.dark',
-                    fontWeight: 'semibold',
-                  }}
-                >
-                  Placeholders
-                </Typography>
-                <Tooltip
-                  title={
-                    <Typography variant="body2">
-                      These variable names will be used as placeholders in your
-                      email body, like "{`{{ firstName }}`}".
-                    </Typography>
-                  }
-                  placement="top" // You can adjust placement (e.g., "top", "bottom", "left", "right")
-                  arrow // Adds a small arrow to the tooltip
-                >
-                  <InfoIcon color="action" sx={{ ml: 1, cursor: 'help' }} />{' '}
-                </Tooltip>
-              </Box>
-              <TableContainer
-                component={Paper}
-                elevation={0}
-                variant="outlined"
-                sx={{
-                  border: '1px solid rgba(224, 224, 224, 1)',
-                  borderRadius: 2,
-                }}
-              >
-                <Table size="small" aria-label="global variables table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold' }}>
-                        Variable Name
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                        Actions
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {globalVariables.map((variable, index) => (
-                      <TableRow key={variable.id}>
-                        <TableCell>
-                          <TextField
-                            fullWidth
-                            label={`Variable ${index + 1}`}
-                            value={variable.name}
-                            onChange={(e) =>
-                              updateGlobalVariable(variable.id, e.target.value)
-                            }
-                            required
-                            size="small"
-                            placeholder="e.g., firstName, company"
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          {globalVariables.length > 1 && (
-                            <IconButton
-                              color="error"
-                              onClick={() => removeGlobalVariable(variable.id)}
-                              aria-label="remove global variable"
-                              size="small"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={addGlobalVariable}
-                size="small"
-                sx={{ mt: 2 }}
-              >
-                Add Placeholder
-              </Button>
-
-              <Divider sx={{ my: '0.5' }} />
-
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: 'success.dark',
-                    fontWeight: 'semibold',
-                  }}
-                >
-                  Recipient Details
-                </Typography>
-                <Tooltip
-                  title={
-                    <Typography variant="body2">
-                      Provide email addresses and the specific values for each
-                      placeholder defined above.
-                    </Typography>
-                  }
-                  placement="top" // You can adjust placement (e.g., "top", "bottom", "left", "right")
-                  arrow // Adds a small arrow to the tooltip
-                >
-                  <InfoIcon color="action" sx={{ ml: 1, cursor: 'help' }} />{' '}
-                </Tooltip>
-              </Box>
-
-              <TableContainer
-                component={Paper}
-                elevation={0}
-                variant="outlined"
-                sx={{
-                  border: '1px solid rgba(224, 224, 224, 1)',
-                  borderRadius: 2,
-                }}
-              >
-                <Table size="small" aria-label="recipients table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold', minWidth: 150 }}>
-                        Recipient Email
-                      </TableCell>
-                      {globalVariables.map((globalVar, index) => (
-                        <TableCell
-                          key={globalVar.id}
-                          sx={{ fontWeight: 'bold', minWidth: 120 }}
-                        >
-                          {globalVar.name || `Variable ${index + 1}`}
-                        </TableCell>
-                      ))}
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                        Actions
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {recipients.length === 0 && (
-                      <TableRow>
-                        <TableCell
-                          colSpan={globalVariables.length + 2}
-                          sx={{ textAlign: 'center', py: 3 }}
-                        >
-                          <Typography color="textSecondary">
-                            No recipients added yet. Click "Add Recipient"
-                            below.
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {recipients.map((recipient) => (
-                      <TableRow key={recipient.id}>
-                        <TableCell>
-                          <TextField
-                            fullWidth
-                            type="email"
-                            value={recipient.email}
-                            onChange={(e) =>
-                              updateRecipientEmail(recipient.id, e.target.value)
-                            }
-                            required
-                            size="small"
-                            placeholder="email@example.com"
-                          />
-                        </TableCell>
-                        {globalVariables.map((globalVar, varIndex) => (
-                          <TableCell key={globalVar.id}>
-                            <TextField
-                              fullWidth
-                              value={recipient.variableValues[varIndex] || ''}
-                              onChange={(e) =>
-                                updateRecipientVariableValue(
-                                  recipient.id,
-                                  varIndex,
-                                  e.target.value
-                                )
-                              }
-                              required
-                              size="small"
-                              placeholder={`Value for ${globalVar.name}`}
-                            />
-                          </TableCell>
-                        ))}
-                        <TableCell align="right">
-                          {recipients.length > 1 && (
-                            <IconButton
-                              color="error"
-                              onClick={() => removeRecipient(recipient.id)}
-                              aria-label="remove recipient"
-                              size="small"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Button
-                variant="contained"
-                startIcon={<GroupAddIcon />}
-                onClick={addRecipient}
-                sx={{ width: '100%', py: 1.5, mt: 2 }}
-              >
-                Add Another Recipient
-              </Button>
-            </Box>
-          )}
-
-          <Divider sx={{ my: 2 }} />
-
-          <TextField
-            fullWidth
-            label="Subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            required
-            margin="normal"
-            placeholder="e.g., Your personalized update!"
-          />
-
-          <Box sx={{ mt: 2, mb: 1 }}>
-            <BodyEditor
-              content={body}
-              onContentChange={setBody}
-              label="Email Body"
-            />
-          </Box>
-          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+      <form onSubmit={handleSubmit} style={{}}>
+        {inputMode === 'csv' ? (
+          <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
             <Button
               component="label"
-              variant="outlined"
+              variant="contained"
               startIcon={<FileUploadIcon />}
             >
-              Upload Attachment (Optional)
+              Upload CSV File
               <input
-                id="attachment-file-input"
+                id="csv-file-input"
                 type="file"
                 hidden
-                onChange={(e) => setAttachment(e.target.files[0])}
+                accept=".csv"
+                onChange={(e) => setCsvFile(e.target.files[0])}
+                required
               />
             </Button>
-            <Typography
-              variant="body2"
-              sx={{ color: 'text.secondary', ml: 2, wordBreak: 'break-all' }}
-            >
-              {attachment ? attachment.name : 'No attachment selected'}
+            <Typography variant="body2" sx={{ color: 'text.secondary', ml: 2 }}>
+              {csvFile ? csvFile.name : 'No CSV file selected'}
             </Typography>
           </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'success.dark',
+                  fontWeight: 'semibold',
+                }}
+              >
+                Variables
+              </Typography>
+              <Tooltip
+                title={
+                  <Typography variant="body2">
+                    These variable names will be used as placeholders in your
+                    email body, like "{`{{ firstName }}`}".
+                  </Typography>
+                }
+                placement="top"
+                arrow
+              >
+                <InfoIcon color="action" sx={{ ml: 1, cursor: 'help' }} />{' '}
+              </Tooltip>
+            </Box>
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              variant="outlined"
+              sx={{
+                border: '1px solid rgba(224, 224, 224, 1)',
+                borderRadius: 2,
+              }}
+            >
+              <Table size="small" aria-label="global variables table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>
+                      Variable Name
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {globalVariables.map((variable, index) => (
+                    <TableRow key={variable.id}>
+                      <TableCell>
+                        <TextField
+                          fullWidth
+                          label={`Variable ${index + 1}`}
+                          value={variable.name}
+                          onChange={(e) =>
+                            updateGlobalVariable(variable.id, e.target.value)
+                          }
+                          required
+                          size="small"
+                          placeholder="e.g., firstName, company"
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        {globalVariables.length > 1 && (
+                          <IconButton
+                            color="error"
+                            onClick={() => removeGlobalVariable(variable.id)}
+                            aria-label="remove global variable"
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={addGlobalVariable}
+              size="small"
+              sx={{ mt: 2 }}
+            >
+              Add Variable
+            </Button>
+
+            <Divider sx={{ my: '0.5' }} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'success.dark',
+                  fontWeight: 'semibold',
+                }}
+              >
+                Recipient Details
+              </Typography>
+              <Tooltip
+                title={
+                  <Typography variant="body2">
+                    Provide email addresses and the specific values for each
+                    variable defined above.
+                  </Typography>
+                }
+                placement="top"
+                arrow
+              >
+                <InfoIcon color="action" sx={{ ml: 1, cursor: 'help' }} />{' '}
+              </Tooltip>
+            </Box>
+
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              variant="outlined"
+              sx={{
+                border: '1px solid rgba(224, 224, 224, 1)',
+                borderRadius: 2,
+              }}
+            >
+              <Table size="small" aria-label="recipients table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold', minWidth: 150 }}>
+                      Recipient Email
+                    </TableCell>
+                    {globalVariables.map((globalVar, index) => (
+                      <TableCell
+                        key={globalVar.id}
+                        sx={{ fontWeight: 'bold', minWidth: 120 }}
+                      >
+                        {globalVar.name || `Variable ${index + 1}`}
+                      </TableCell>
+                    ))}
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {recipients.length === 0 && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={globalVariables.length + 2}
+                        sx={{ textAlign: 'center', py: 3 }}
+                      >
+                        <Typography color="textSecondary">
+                          No recipients added yet. Click "Add Recipient" below.
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {recipients.map((recipient) => (
+                    <TableRow key={recipient.id}>
+                      <TableCell>
+                        <TextField
+                          fullWidth
+                          type="email"
+                          value={recipient.email}
+                          onChange={(e) =>
+                            updateRecipientEmail(recipient.id, e.target.value)
+                          }
+                          required
+                          size="small"
+                          placeholder="email@example.com"
+                        />
+                      </TableCell>
+                      {globalVariables.map((globalVar, varIndex) => (
+                        <TableCell key={globalVar.id}>
+                          <TextField
+                            fullWidth
+                            value={recipient.variableValues[varIndex] || ''}
+                            onChange={(e) =>
+                              updateRecipientVariableValue(
+                                recipient.id,
+                                varIndex,
+                                e.target.value
+                              )
+                            }
+                            required
+                            size="small"
+                            placeholder={`Value for ${globalVar.name}`}
+                          />
+                        </TableCell>
+                      ))}
+                      <TableCell align="right">
+                        {recipients.length > 1 && (
+                          <IconButton
+                            color="error"
+                            onClick={() => removeRecipient(recipient.id)}
+                            aria-label="remove recipient"
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Button
+              variant="contained"
+              startIcon={<GroupAddIcon />}
+              onClick={addRecipient}
+              sx={{ width: '100%', py: 1.5, mt: 2 }}
+            >
+              Add Another Recipient
+            </Button>
+          </Box>
+        )}
+
+        <Divider sx={{ my: 2 }} />
+
+        <TextField
+          fullWidth
+          label="Subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          required
+          margin="normal"
+          placeholder="e.g., Your personalized update!"
+        />
+
+        <Box sx={{ mt: 2, mb: 1 }}>
+          <BodyEditor
+            content={body}
+            onContentChange={setBody}
+            label="Email Body"
+          />
+        </Box>
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
           <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            disabled={loading || !token}
-            sx={{
-              py: 1.5,
-              boxShadow: 2,
-              '&:hover': { boxShadow: 4, transform: 'translateY(-2px)' },
-              transition: 'all 0.3s ease-in-out',
-            }}
+            component="label"
+            variant="outlined"
+            startIcon={<FileUploadIcon />}
           >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              'Send Emails'
-            )}
+            Upload Attachment (Optional)
+            <input
+              id="attachment-file-input"
+              type="file"
+              hidden
+              onChange={(e) => setAttachment(e.target.files[0])}
+            />
           </Button>
-        </form>
-      </Box>
-    </Container>
+          <Typography
+            variant="body2"
+            sx={{ color: 'text.secondary', ml: 2, wordBreak: 'break-all' }}
+          >
+            {attachment ? attachment.name : 'No attachment selected'}
+          </Typography>
+        </Box>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={loading || !token}
+          sx={{
+            py: 1.5,
+            boxShadow: 2,
+            '&:hover': { boxShadow: 4, transform: 'translateY(-2px)' },
+            transition: 'all 0.3s ease-in-out',
+          }}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            'Send Emails'
+          )}
+        </Button>
+      </form>
+    </>
   );
 };
 

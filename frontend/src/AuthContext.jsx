@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     title: '',
     message: '',
   });
+  const [viewMode, setViewMode] = useState('compose');
 
   const showMessage = ({ open, title, message }) => {
     setMessageBox({ open, title, message });
@@ -64,13 +65,23 @@ export const AuthProvider = ({ children }) => {
         if (authToken) {
           setToken(authToken);
           const response = await axios.get(
-            'http://localhost:5001/api/user/profile', // Replace with your backend route
+            'http://localhost:5001/api/user/profile',
             {
               headers: {
-                Authorization: `Bearer ${authToken}`, // if you need auth on the backend
+                Authorization: `Bearer ${authToken}`,
               },
             }
           );
+
+          const responseList = await axios.get(
+            'http://localhost:5001/api/user/listMails',
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+          console.log({ responseList });
           console.log({ response });
           setUser(response.data);
         }
@@ -79,7 +90,7 @@ export const AuthProvider = ({ children }) => {
         showMessage({
           open: true,
           title: 'Error',
-          message: 'Failed to load session. Please log in.',
+          message: 'Please log in!',
         });
       } finally {
         setLoadingApp(false);
@@ -96,14 +107,14 @@ export const AuthProvider = ({ children }) => {
       showMessage({
         open: true,
         title: 'Login Status',
-        message: 'Login successful! Token stored.',
+        message: 'Login successful!',
       });
     } catch (err) {
       console.error('Login failed during save:', err);
       showMessage({
         open: true,
         title: 'Login Error',
-        message: 'Failed to log in or store token.',
+        message: 'Failed to log in! Please try again! ',
       });
     }
   };
@@ -138,6 +149,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     loadingApp,
     showMessage,
+    viewMode,
+    setViewMode,
   };
 
   return (

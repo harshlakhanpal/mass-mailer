@@ -15,5 +15,9 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "host_permissions": ["http://localhost:5001/", "https://www.googleapis.com/*"]
+  "host_permissions": [
+    "http://localhost:5001/",
+    "https://www.googleapis.com/*",
+    "https://mass-mailer-n1go.onrender.com/"
+  ]
 }

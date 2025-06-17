@@ -28,7 +28,7 @@ const LoginComponent = () => {
           showMessage({
             open: true,
             title: 'Login Error',
-            message: `Extension login failed: ${chrome.runtime.lastError.message}`,
+            message: `Google login failed`,
           });
           return;
         }
@@ -63,8 +63,7 @@ const LoginComponent = () => {
               showMessage({
                 open: true,
                 title: 'Backend Response Error',
-                message:
-                  'Backend response missing essential authentication data.',
+                message: 'Authentication Error! Please try again!',
               });
             }
           } catch (err) {
@@ -76,7 +75,7 @@ const LoginComponent = () => {
             showMessage({
               open: true,
               title: 'Backend Auth Failed',
-              message: `Backend authentication failed: ${errorMessage}`,
+              message: `Authentication failed`,
             });
           }
         } else {
@@ -87,8 +86,7 @@ const LoginComponent = () => {
           showMessage({
             open: true,
             title: 'Login Failed',
-            message: `Login failed: ${
-              response?.error || 'No token from extension.'
+            message: `Login failed'
             }`,
           });
         }
@@ -101,7 +99,7 @@ const LoginComponent = () => {
         open: true,
         title: 'Environment Error',
         message:
-          'This application needs to be run as a Chrome extension for Google login to work. Please ensure it is loaded as an unpacked extension.',
+          'This application needs to be run as a Chrome extension for Google login to work.',
       });
     }
   };

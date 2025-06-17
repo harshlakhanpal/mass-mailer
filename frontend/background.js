@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       `https://accounts.google.com/o/oauth2/auth?client_id=${CLIENT_ID}` +
       `&response_type=code` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-      `&access_type=offline` + // <== this is essential for refresh token
+      `&access_type=offline` +
       `&scope=${encodeURIComponent(SCOPES.join(' '))}` +
       `&prompt=consent`;
 
@@ -89,15 +89,12 @@ function updateChromeBrowserAndExtension(windowId) {
         });
     };
 
-    // First, make the browser maximised
     makeBrowserMaximised(windowId)
       .then((maximisedWindow) => {
         console.log('Browser maximised:', maximisedWindow);
 
-        // Call updateExtension once as soon as the window is maximised
         updateExtension(maximisedWindow);
 
-        // Now attempt to resize the maximised window
         return tryResizingWindow(maximisedWindow);
       })
       .catch((error) => {
@@ -283,12 +280,5 @@ function refreshPopup() {
 }
 
 chrome.action.onClicked.addListener(async (tab) => {
-  /*always open the extension
-    if user is authenticated - stay where they are
-    if not authenticated 
-       doesn't have a dooglie auth tab open - open one
-       else - takes user to a new dooglie tab
-    */
-
   return updateChromeBrowserAndExtension(tab.windowId);
 });

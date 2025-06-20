@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { connectDB } from './config/db';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import emailTemplateRoutes from './routes/emailTemplateRoutes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -12,8 +13,6 @@ dotenv.config();
 connectDB();
 
 const app = express();
-
-// parse data with connect-multiparty.
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,8 +28,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-
-// Global error handler
+app.use('/api/template', emailTemplateRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8080;

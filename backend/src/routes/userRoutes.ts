@@ -7,8 +7,10 @@ import { formDataMiddleware } from '../middlewares/formDataMiddleware';
 
 const router = express.Router();
 
-router.get('/profile', protect, catchAsync(getProfile));
-router.post('/sendMails', protect, formDataMiddleware, catchAsync(sendMails));
-router.get('/listMails', protect, catchAsync(listMails));
+router.use(protect);
+
+router.get('/profile', catchAsync(getProfile));
+router.post('/sendMails', formDataMiddleware, catchAsync(sendMails));
+router.get('/listMails', catchAsync(listMails));
 
 export default router;
